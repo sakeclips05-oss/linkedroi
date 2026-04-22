@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "linkedroi",
+      "src": "linkedroi-integrated.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "linkedroi"
+      "dest": "linkedroi-integrated.html"
     }
   ]
 }
