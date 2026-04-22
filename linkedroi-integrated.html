@@ -1,0 +1,3680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedROI — Track Revenue from LinkedIn Content</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0a0f;
+  --ink2: #1e1e2e;
+  --ink3: #2d2d42;
+  --muted: #6b6b8a;
+  --muted2: #9494b0;
+  --line: rgba(255,255,255,0.07);
+  --line2: rgba(255,255,255,0.12);
+  --surface: #13131f;
+  --surface2: #1a1a2e;
+  --surface3: #222238;
+  --accent: #6c63ff;
+  --accent2: #8b85ff;
+  --accent3: #b8b4ff;
+  --gold: #f5c842;
+  --gold2: #ffd966;
+  --teal: #00d4aa;
+  --teal2: #00f0c0;
+  --coral: #ff6b6b;
+  --coral2: #ff8e8e;
+  --green: #22c55e;
+  --green2: #4ade80;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 48px rgba(0,0,0,0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: #e8e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ink2); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* ── LAYOUT ── */
+.app { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--line2);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  color: white;
+}
+
+.logo-text span { color: var(--accent3); }
+
+.nav-section {
+  padding: 16px 12px 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 8px;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+.nav-label:first-child { margin-top: 0; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--muted2);
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: var(--surface2);
+  color: #e8e8f0;
+}
+
+.nav-item.active {
+  background: rgba(108, 99, 255, 0.15);
+  color: var(--accent3);
+  font-weight: 500;
+}
+
+.nav-item.active .nav-icon { color: var(--accent); }
+
+.nav-icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+}
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--line);
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.user-card:hover { background: var(--surface2); }
+
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: white;
+  flex-shrink: 0;
+}
+
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-plan { font-size: 11px; color: var(--gold); }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  margin-left: 240px;
+  min-height: 100vh;
+  transition: margin 0.3s ease;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line2);
+  padding: 0 28px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+
+.menu-toggle {
+  display: none;
+  background: none; border: none;
+  color: #e8e8f0; cursor: pointer;
+  padding: 6px; border-radius: 6px;
+}
+
+.menu-toggle:hover { background: var(--surface2); }
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: white;
+}
+
+.breadcrumb {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,99,255,0.4); }
+
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--muted2);
+  border: 1px solid var(--line2);
+}
+.btn-ghost:hover { background: var(--surface3); color: white; }
+
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── CONTENT PADDING ── */
+.page-body { padding: 28px; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: white;
+}
+
+.section-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── METRIC CARDS ── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.metric-card:hover { border-color: rgba(255,255,255,0.2); }
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--card-accent, var(--accent));
+  border-radius: 2px 2px 0 0;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: white;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.metric-delta {
+  font-size: 12px;
+  display: flex; align-items: center; gap: 4px;
+}
+
+.delta-up { color: var(--green); }
+.delta-down { color: var(--coral); }
+.delta-neutral { color: var(--muted); }
+
+.metric-icon {
+  position: absolute;
+  top: 18px; right: 18px;
+  font-size: 20px;
+  opacity: 0.2;
+}
+
+/* ── DASHBOARD GRID ── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -0.01em;
+}
+
+.card-body { padding: 16px 20px; }
+
+/* ── FUNNEL ── */
+.funnel-item {
+  margin-bottom: 14px;
+}
+
+.funnel-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.funnel-label { font-size: 12px; color: var(--muted2); }
+.funnel-count { font-size: 13px; font-weight: 500; color: white; font-family: var(--font-mono); }
+.funnel-pct { font-size: 11px; color: var(--muted); margin-left: 6px; }
+
+.funnel-bar-bg {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.funnel-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── TABLE ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: #c8c8e0;
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.post-title-cell {
+  font-weight: 500;
+  color: white;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.revenue-cell {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--green2);
+}
+
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tag-purple { background: rgba(108,99,255,0.15); color: var(--accent3); }
+.tag-green { background: rgba(34,197,94,0.12); color: var(--green2); }
+.tag-gold { background: rgba(245,200,66,0.12); color: var(--gold2); }
+.tag-teal { background: rgba(0,212,170,0.12); color: var(--teal2); }
+.tag-coral { background: rgba(255,107,107,0.12); color: var(--coral2); }
+.tag-gray { background: rgba(255,255,255,0.06); color: var(--muted2); }
+
+/* ── PIPELINE ── */
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pipeline-col {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.pipeline-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.pipeline-stage-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+
+.pipeline-count-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  background: var(--surface3);
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.pipeline-total {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--green2);
+  padding: 6px 14px 10px;
+  font-size: 12px;
+}
+
+.pipeline-items { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+
+.lead-card-mini {
+  background: var(--surface3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lead-card-mini:hover {
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+}
+
+.lead-name { font-size: 13px; font-weight: 500; color: white; margin-bottom: 3px; }
+.lead-meta { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.lead-revenue { font-family: var(--font-mono); font-size: 11px; color: var(--green2); font-weight: 500; }
+
+/* ── POSTS PAGE ── */
+.posts-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.post-row {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  transition: border-color 0.15s;
+}
+
+.post-row:hover { border-color: rgba(255,255,255,0.18); }
+
+.post-row-left {}
+.post-row-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 6px; line-height: 1.4; }
+.post-row-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.post-meta-item { font-size: 12px; color: var(--muted2); display: flex; align-items: center; gap: 4px; }
+.post-meta-item svg { opacity: 0.6; }
+
+.post-row-stats {
+  display: flex; align-items: center; gap: 20px;
+  flex-shrink: 0;
+}
+
+.post-stat {
+  text-align: right;
+}
+
+.post-stat-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: white;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.post-stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.post-link-row {
+  margin-top: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.link-pill {
+  background: var(--surface3);
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent3);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+.link-pill:hover { border-color: var(--accent); }
+
+/* ── LEADS PAGE ── */
+.leads-table-wrap {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.lead-stage-btn {
+  background: none;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+
+.lead-stage-btn:hover { border-color: var(--accent); color: var(--accent3); }
+
+/* ── ADD POST MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  padding: 24px 24px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.modal-close {
+  background: var(--surface2); border: none;
+  width: 30px; height: 30px; border-radius: 50%;
+  cursor: pointer; color: var(--muted2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: all 0.15s;
+}
+
+.modal-close:hover { background: var(--surface3); color: white; }
+
+.modal-body { padding: 20px 24px; }
+
+.form-group { margin-bottom: 18px; }
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--muted2);
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: white;
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+  outline: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder { color: var(--muted); }
+
+.form-select option { background: var(--surface2); color: white; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-footer {
+  padding: 16px 24px 24px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
+
+/* ── SMART LINK BOX ── */
+.link-result {
+  background: rgba(108,99,255,0.08);
+  border: 1px solid rgba(108,99,255,0.25);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.link-result-label { font-size: 11px; color: var(--muted2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.link-result-url {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent3);
+  word-break: break-all;
+}
+.link-copy-btn {
+  margin-top: 10px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.link-copy-btn:hover { background: var(--accent2); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--surface);
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: white;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  display: flex; align-items: center; gap: 8px;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { color: var(--green); font-size: 16px; }
+
+/* ── ATTRIBUTION TOGGLE ── */
+.attr-toggle {
+  display: flex;
+  background: var(--surface3);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.attr-btn {
+  padding: 5px 12px;
+  border: none;
+  background: none;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+.attr-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  position: relative;
+  max-width: 280px;
+}
+
+.search-bar input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 8px 12px 8px 34px;
+  font-size: 13px;
+  color: white;
+  outline: none;
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+}
+
+.search-bar input:focus { border-color: var(--accent); }
+.search-bar input::placeholder { color: var(--muted); }
+
+.search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ── ANALYTICS PAGE ── */
+.attr-model-card {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.attr-model-card:hover { border-color: rgba(255,255,255,0.2); }
+.attr-model-card.selected { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+
+.attr-model-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.attr-model-desc { font-size: 12px; color: var(--muted); }
+
+/* ── CHART PLACEHOLDER ── */
+.chart-area {
+  height: 180px;
+  position: relative;
+  display: flex; align-items: flex-end; gap: 10px;
+  padding: 10px 0 0;
+}
+
+.chart-bar-wrap {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+
+.chart-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--accent);
+  opacity: 0.7;
+  transition: all 0.6s cubic-bezier(0.4,0,0.2,1);
+  cursor: pointer;
+}
+
+.chart-bar:hover { opacity: 1; }
+
+.chart-bar.gold { background: var(--gold); }
+.chart-bar.teal { background: var(--teal); }
+.chart-bar.coral { background: var(--coral); }
+
+.chart-label { font-size: 9px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty-text { font-size: 14px; }
+.empty-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* ── MOBILE OVERLAY ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+}
+
+/* ── SETTINGS ── */
+.settings-grid { display: grid; gap: 16px; }
+.settings-card {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.settings-card-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: white; margin-bottom: 14px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+.settings-row-label { font-size: 13px; color: #c8c8e0; }
+.settings-row-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.toggle-switch {
+  position: relative; width: 38px; height: 22px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: var(--surface3);
+  border: 1px solid var(--line2);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 2px; top: 2px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--accent); border-color: var(--accent); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); background: white; }
+
+/* ── INTEGRATIONS ── */
+.integration-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  transition: border-color 0.15s;
+}
+.integration-card:hover { border-color: rgba(255,255,255,0.18); }
+.int-left { display: flex; align-items: center; gap: 12px; }
+.int-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.int-name { font-size: 14px; font-weight: 500; color: white; }
+.int-desc { font-size: 12px; color: var(--muted); }
+.int-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+.int-connected { background: rgba(34,197,94,0.12); color: var(--green2); }
+.int-soon { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid { grid-template-columns: 1fr; }
+  .pipeline-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0,0,0,0.5);
+  }
+  .sidebar-overlay.open { display: block; }
+  .main { margin-left: 0; }
+  .menu-toggle { display: flex; }
+  .topbar { padding: 0 16px; }
+  .page-body { padding: 16px; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .pipeline-grid { grid-template-columns: repeat(2, 1fr); }
+  .post-row { grid-template-columns: 1fr; }
+  .post-row-stats { justify-content: flex-start; }
+  .form-row { grid-template-columns: 1fr; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+  .attr-toggle { flex-wrap: wrap; }
+  .dash-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .metrics-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric-value { font-size: 22px; }
+  .pipeline-grid { grid-template-columns: 1fr 1fr; }
+  .topbar { height: 52px; }
+  .page-title { font-size: 15px; }
+  .data-table th:nth-child(n+4),
+  .data-table td:nth-child(n+4) { display: none; }
+  .post-row-stats { gap: 12px; }
+  .search-bar { max-width: 100%; }
+}
+
+/* ── AUTH OVERLAY ── */
+#authOverlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.auth-box {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  width: 100%; max-width: 400px;
+  box-shadow: var(--shadow-lg);
+}
+.auth-logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 28px; justify-content: center;
+}
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  color: white; text-align: center;
+  margin-bottom: 6px;
+}
+.auth-sub {
+  font-size: 13px; color: var(--muted);
+  text-align: center; margin-bottom: 28px;
+}
+.auth-tabs {
+  display: flex; gap: 4px;
+  background: var(--surface3);
+  border-radius: 8px; padding: 4px;
+  margin-bottom: 24px;
+}
+.auth-tab {
+  flex: 1; padding: 8px;
+  border: none; background: none;
+  color: var(--muted2); font-size: 13px;
+  font-weight: 500; border-radius: 6px;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.auth-tab.active { background: var(--accent); color: white; }
+.auth-error {
+  background: rgba(255,107,107,0.1);
+  border: 1px solid rgba(255,107,107,0.2);
+  color: var(--coral2); font-size: 12px;
+  padding: 10px 12px; border-radius: 8px;
+  margin-bottom: 16px; display: none;
+}
+.auth-btn {
+  width: 100%; padding: 11px;
+  background: var(--accent); color: white;
+  border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body);
+  transition: all 0.15s; margin-top: 4px;
+}
+.auth-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+.auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.auth-divider {
+  text-align: center; font-size: 11px;
+  color: var(--muted); margin: 16px 0;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<!-- AUTH OVERLAY -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-mark">L</div>
+      <div class="logo-text">Linked<span>ROI</span></div>
+    </div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Track which LinkedIn posts make you money</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Create account</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+      </div>
+      <button class="auth-btn" id="loginBtn" onclick="handleLogin()">Sign in</button>
+    </div>
+    <div id="signupForm" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <input type="text" class="form-input" id="signupName" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="signupPassword" placeholder="Min 6 characters">
+      </div>
+      <button class="auth-btn" id="signupBtn" onclick="handleSignup()">Create account</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">L</div>
+    <div class="logo-text">Linked<span>ROI</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <button class="nav-item active" onclick="showPage('dashboard', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".3"/></svg></span>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('analytics', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 8L8.5 10L12 5L14 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      Analytics
+    </button>
+
+    <div class="nav-label">Content</div>
+    <button class="nav-item" onclick="showPage('posts', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      Posts
+      <span class="nav-badge">12</span>
+    </button>
+    <button class="nav-item" onclick="showPage('links', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.5 9.5a4 4 0 0 0 5.657 0l1.414-1.414a4 4 0 0 0-5.657-5.657L7.5 3.843" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9.5 6.5a4 4 0 0 0-5.657 0L2.43 7.914a4 4 0 0 0 5.657 5.657l.414-.414" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      Smart Links
+    </button>
+
+    <div class="nav-label">Revenue</div>
+    <button class="nav-item" onclick="showPage('leads', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      Leads
+      <span class="nav-badge">34</span>
+    </button>
+    <button class="nav-item" onclick="showPage('pipeline', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h3v8H2zM6.5 4h3v8h-3zM11 4h3v8h-3z" stroke="currentColor" stroke-width="1.3" rx="1"/></svg></span>
+      Pipeline
+    </button>
+
+    <div class="nav-label">Settings</div>
+    <button class="nav-item" onclick="showPage('integrations', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V3zM2 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3zM2 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 4h4M4 6v4M11 6v2a2 2 0 0 1-2 2H8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      Integrations
+    </button>
+    <button class="nav-item" onclick="showPage('settings', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      Settings
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">YK</div>
+      <div class="user-info">
+        <div class="user-name">Yash Kumar</div>
+        <div class="user-plan">⭐ Pro Plan</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-bar" style="display:none" id="searchBar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." id="searchInput" oninput="handleSearch()">
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Add Post
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD PAGE ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Revenue overview</div>
+          <div class="section-sub">Last 30 days · First-touch attribution</div>
+        </div>
+        <div class="attr-toggle">
+          <button class="attr-btn active" onclick="setAttr(this,'first')">First touch</button>
+          <button class="attr-btn" onclick="setAttr(this,'last')">Last touch</button>
+          <button class="attr-btn" onclick="setAttr(this,'linear')">Linear</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" style="--card-accent:var(--green)">
+          <div class="metric-icon">$</div>
+          <div class="metric-label">Revenue attributed</div>
+          <div class="metric-value" id="m-revenue">$4,520</div>
+          <div class="metric-delta delta-up">↑ 18% vs last month</div>
+        </div>
+        <div class="metric-card" style="--card-accent:var(--accent)">
+          <div class="metric-icon">👤</div>
+          <div class="metric-label">Leads captured</div>
+          <div class="metric-value">34</div>
+          <div class="metric-delta delta-up">↑ 11 new this week</div>
+        </div>
+        <div class="metric-card" style="--card-accent:var(--gold)">
+          <div class="metric-icon">📅</div>
+          <div class="metric-label">Calls booked</div>
+          <div class="metric-value">11</div>
+          <div class="metric-delta delta-neutral">32% lead → call rate</div>
+        </div>
+        <div class="metric-card" style="--card-accent:var(--teal)">
+          <div class="metric-icon">📝</div>
+          <div class="metric-label">Active posts</div>
+          <div class="metric-value">12</div>
+          <div class="metric-delta delta-up">↑ 3 added this week</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Top posts -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top posts by revenue</div>
+            <div class="attr-toggle" style="transform:scale(0.9);transform-origin:right">
+              <button class="attr-btn active" onclick="setAttr(this,'30d')">30d</button>
+              <button class="attr-btn" onclick="setAttr(this,'90d')">90d</button>
+              <button class="attr-btn" onclick="setAttr(this,'all')">All</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Post</th>
+                <th>Impressions</th>
+                <th>Leads</th>
+                <th>Calls</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="post-title-cell">How I closed $60K using LinkedIn only</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apr 12 · <span class="tag tag-green" style="font-size:9px">First touch</span></div></td>
+                <td style="font-family:var(--font-mono)">12.4K</td>
+                <td>8</td>
+                <td>4</td>
+                <td class="revenue-cell">$1400</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">3 mistakes SaaS founders make with cold outreach</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apr 8</div></td>
+                <td style="font-family:var(--font-mono)">8.1K</td>
+                <td>5</td>
+                <td>3</td>
+                <td class="revenue-cell">$1,080</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">Why cold DMs fail (and what to do instead)</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apr 2</div></td>
+                <td style="font-family:var(--font-mono)">5.6K</td>
+                <td>4</td>
+                <td>2</td>
+                <td class="revenue-cell">$840</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">My exact outreach script (copy it free)</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Mar 28</div></td>
+                <td style="font-family:var(--font-mono)">3.2K</td>
+                <td>2</td>
+                <td>1</td>
+                <td class="revenue-cell">$400</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">The LinkedIn framework that got me 100 leads</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Mar 20</div></td>
+                <td style="font-family:var(--font-mono)">2.8K</td>
+                <td>2</td>
+                <td>1</td>
+                <td class="revenue-cell">$5,000</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">How to write a LinkedIn post that converts</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Mar 15</div></td>
+                <td style="font-family:var(--font-mono)">1.9K</td>
+                <td>1</td>
+                <td>0</td>
+                <td class="revenue-cell" style="color:var(--muted)">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Funnel -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Conversion funnel</div>
+          </div>
+          <div class="card-body">
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">👁 Impressions</span>
+                <span class="funnel-count">42,000</span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:100%;background:var(--accent)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">🔗 Link clicks</span>
+                <span class="funnel-count">1,260 <span class="funnel-pct">3.0%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:60%;background:var(--teal)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">📋 Leads</span>
+                <span class="funnel-count">34 <span class="funnel-pct">2.7%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:30%;background:var(--gold)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">📅 Calls booked</span>
+                <span class="funnel-count">11 <span class="funnel-pct">32.4%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:18%;background:var(--coral)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">🏆 Deals closed</span>
+                <span class="funnel-count">6 <span class="funnel-pct">54.5%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:10%;background:var(--green)"></div></div>
+            </div>
+
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:12px;color:var(--muted)">Avg deal size</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:var(--green2);font-weight:500">$840</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:12px;color:var(--muted)">Cost per lead</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:white;font-weight:500">$0</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:12px;color:var(--muted)">Revenue per impression</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:white;font-weight:500">$0.12</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline mini on dashboard -->
+      <div class="section-header" style="margin-top:8px">
+        <div>
+          <div class="section-title">Live pipeline</div>
+          <div class="section-sub">Lead stages across all posts</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('pipeline', document.querySelector('.nav-item:nth-child(6))'))">View all →</button>
+      </div>
+
+      <div class="pipeline-grid">
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">New lead</span>
+            <span class="pipeline-count-badge">12</span>
+          </div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Priya Sharma</div>
+              <div class="lead-meta"><span>post #P001</span><span>2h ago</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Rohan Mehta</div>
+              <div class="lead-meta"><span>post #P003</span><span>5h ago</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">Contacted</span>
+            <span class="pipeline-count-badge">8</span>
+          </div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Rahul Mishra</div>
+              <div class="lead-meta"><span>post #P007</span><span>1d ago</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Sneha Patel</div>
+              <div class="lead-meta"><span>post #P002</span><span>2d ago</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">Call booked</span>
+            <span class="pipeline-count-badge">11</span>
+          </div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Anjali Kapoor</div>
+              <div class="lead-meta"><span>post #P001</span><span class="tag tag-gold" style="font-size:9px">Calendly</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Dev Agarwal</div>
+              <div class="lead-meta"><span>post #P003</span><span class="tag tag-gold" style="font-size:9px">Calendly</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">Closed won</span>
+            <span class="pipeline-count-badge">6</span>
+          </div>
+          <div class="pipeline-total">$2,760 total</div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Vikram Pande</div>
+              <div class="lead-meta"><span class="lead-revenue">$840</span><span>post #P001</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Meera Joshi</div>
+              <div class="lead-meta"><span class="lead-revenue">$1,080</span><span>post #P002</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ POSTS PAGE ═══ -->
+  <div class="page" id="page-posts">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Posts</div>
+          <div class="section-sub">All tracked LinkedIn posts with attribution data</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search posts..." id="postSearch" oninput="filterPosts()">
+          </div>
+          <button class="btn btn-primary" onclick="openModal()">+ Add post</button>
+        </div>
+      </div>
+
+      <div class="posts-grid" id="postsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SMART LINKS PAGE ═══ -->
+  <div class="page" id="page-links">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Smart links</div>
+          <div class="section-sub">UTM-tagged short links generated from your posts</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Active links</div>
+          <span style="font-size:12px;color:var(--muted)">All links auto-append ?source=linkedin&post_id=…</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Short URL</th>
+              <th>Post</th>
+              <th>Destination</th>
+              <th>Clicks</th>
+              <th>Leads</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody id="linksTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LEADS PAGE ═══ -->
+  <div class="page" id="page-leads">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Leads</div>
+          <div class="section-sub">All captured leads with source attribution</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search leads..." oninput="filterLeads(this.value)">
+          </div>
+          <button class="btn btn-primary" onclick="openAddLeadModal()">+ Add lead</button>
+        </div>
+      </div>
+
+      <div class="leads-table-wrap">
+        <table class="data-table" id="leadsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Source post</th>
+              <th>Stage</th>
+              <th>Deal value</th>
+              <th>Added</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PIPELINE PAGE ═══ -->
+  <div class="page" id="page-pipeline">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Pipeline</div>
+          <div class="section-sub">Drag leads through stages (click stage button to advance)</div>
+        </div>
+      </div>
+      <div class="pipeline-grid" id="pipelineFull" style="margin-bottom:0">
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANALYTICS PAGE ═══ -->
+  <div class="page" id="page-analytics">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Revenue analytics</div>
+          <div class="section-sub">Attribution models and post performance over time</div>
+        </div>
+      </div>
+
+      <!-- Attribution model select -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+        <div class="attr-model-card selected" onclick="selectAttrModel(this,'first')">
+          <div class="attr-model-name">First touch</div>
+          <div class="attr-model-desc">100% credit to the post that first brought the lead</div>
+        </div>
+        <div class="attr-model-card" onclick="selectAttrModel(this,'last')">
+          <div class="attr-model-name">Last touch</div>
+          <div class="attr-model-desc">100% credit to the post viewed just before conversion</div>
+        </div>
+        <div class="attr-model-card" onclick="selectAttrModel(this,'linear')">
+          <div class="attr-model-name">Linear</div>
+          <div class="attr-model-desc">Revenue split equally across all touchpoint posts</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Revenue by post chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Revenue by post</div>
+            <span class="tag tag-purple">First touch model</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-area" id="revenueChart">
+              <!-- Populated by JS -->
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">Click a bar to drill into that post</div>
+          </div>
+        </div>
+
+        <!-- Metrics breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Post benchmarks</div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;color:var(--muted)">Avg impressions / post</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:white">5,600</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;color:var(--muted)">Avg leads / post</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:white">2.8</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;color:var(--muted)">Avg revenue / post</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:var(--green2)">$420</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                  <span style="font-size:12px;color:var(--muted)">Best post revenue</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:var(--gold2)">$1,700</span>
+                </div>
+              </div>
+
+              <div style="border-top:1px solid var(--line);padding-top:14px">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Top topics by revenue</div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden"><div style="width:80%;height:100%;background:var(--accent);border-radius:3px"></div></div>
+                    <span style="font-size:11px;color:var(--muted2);min-width:80px">Case studies</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--green2)">$1,700</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden"><div style="width:55%;height:100%;background:var(--teal);border-radius:3px"></div></div>
+                    <span style="font-size:11px;color:var(--muted2);min-width:80px">Outreach tips</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--green2)">$1,080</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden"><div style="width:35%;height:100%;background:var(--gold);border-radius:3px"></div></div>
+                    <span style="font-size:11px;color:var(--muted2);min-width:80px">Mistakes posts</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--green2)">$840</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INTEGRATIONS PAGE ═══ -->
+  <div class="page" id="page-integrations">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Integrations</div>
+          <div class="section-sub">Connect your favourite tools to sync data automatically</div>
+        </div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(0,200,150,0.1)">📅</div>
+            <div>
+              <div class="int-name">Calendly</div>
+              <div class="int-desc">Auto-update lead stage to "Call booked" when meeting is scheduled</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-connected">● Connected</span>
+            <button class="btn btn-ghost btn-sm">Configure</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(255,110,60,0.1)">🔶</div>
+            <div>
+              <div class="int-name">HubSpot CRM</div>
+              <div class="int-desc">Sync leads and deal stages bi-directionally with HubSpot</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-soon">Disconnected</span>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('HubSpot OAuth initiated')">Connect</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(0,160,240,0.1)">☁️</div>
+            <div>
+              <div class="int-name">Salesforce</div>
+              <div class="int-desc">Push closed deals and contact records to Salesforce automatically</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-soon">Disconnected</span>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Salesforce OAuth initiated')">Connect</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(108,99,255,0.1)">🔗</div>
+            <div>
+              <div class="int-name">Zapier / Make</div>
+              <div class="int-desc">Use webhooks to connect with 1000+ apps via automation platforms</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-connected">● Active</span>
+            <button class="btn btn-ghost btn-sm">View webhooks</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(245,200,66,0.1)">⚡</div>
+            <div>
+              <div class="int-name">Notion</div>
+              <div class="int-desc">Export lead and revenue data to a Notion database automatically</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-soon">Coming soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETTINGS PAGE ═══ -->
+  <div class="page" id="page-settings">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Settings</div>
+          <div class="section-sub">Account preferences and configuration</div>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="settings-card-title">Attribution defaults</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Default attribution model</div>
+              <div class="settings-row-sub">Applied across all dashboard views</div>
+            </div>
+            <select class="form-select" style="width:140px">
+              <option>First touch</option>
+              <option>Last touch</option>
+              <option>Linear</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Currency</div>
+              <div class="settings-row-sub">Used for all revenue display</div>
+            </div>
+            <select class="form-select" style="width:100px">
+              <option>$ INR</option>
+              <option selected>$ USD</option>
+              <option>€ EUR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Notifications</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">New lead alert</div>
+              <div class="settings-row-sub">Email when a new lead is captured</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Call booked alert</div>
+              <div class="settings-row-sub">Notify when Calendly webhook fires</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Weekly digest</div>
+              <div class="settings-row-sub">Revenue summary every Monday</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Lead capture form</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Show "Powered by LinkedROI"</div>
+              <div class="settings-row-sub">Branding on your embedded lead forms</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Your form URL</div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--accent3)">lnkd.roi/f/yash</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ADD POST MODAL -->
+<div class="modal-overlay" id="addPostModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add LinkedIn post</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">LinkedIn post URL</label>
+        <input type="url" class="form-input" id="newPostUrl" placeholder="https://linkedin.com/feed/update/...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Post title / description</label>
+        <input type="text" class="form-input" id="newPostTitle" placeholder="What's this post about?">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Impressions</label>
+          <input type="number" class="form-input" id="newPostImpressions" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Post date</label>
+          <input type="date" class="form-input" id="newPostDate">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Likes</label>
+          <input type="number" class="form-input" id="newPostLikes" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comments</label>
+          <input type="number" class="form-input" id="newPostComments" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Destination URL (your landing page / Calendly)</label>
+        <input type="url" class="form-input" id="newPostDest" placeholder="https://yoursite.com/get-started">
+      </div>
+
+      <div class="link-result" id="linkResult" style="display:none">
+        <div class="link-result-label">Your smart link is ready</div>
+        <div class="link-result-url" id="generatedLink"></div>
+        <button class="link-copy-btn" onclick="copyLink()">Copy link</button>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addPost()">Generate smart link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LEAD MODAL -->
+<div class="modal-overlay" id="addLeadModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add lead manually</div>
+      <button class="modal-close" onclick="closeAddLeadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="leadName" placeholder="Priya Sharma">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="leadEmail" placeholder="priya@company.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Source post</label>
+          <select class="form-select" id="leadSource">
+            <option value="">Unattributed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stage</label>
+          <select class="form-select" id="leadStage">
+            <option>New lead</option>
+            <option>Contacted</option>
+            <option>Call booked</option>
+            <option>Closed won</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deal value ($) — optional</label>
+        <input type="number" class="form-input" id="leadDeal" placeholder="0">
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeAddLeadModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addLead()">Save lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastMsg">Copied to clipboard!</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// LINKEDROI — SUPABASE INTEGRATED
+// ═══════════════════════════════════════════
+
+// ── CONFIG: Replace with your Supabase project details ──
+const SUPABASE_URL = 'https://dtzlapraqavdmnlexesq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0emxhcHJhcWF2ZG1ubGV4ZXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MzMwMjcsImV4cCI6MjA5MjQwOTAyN30.34-NOBrJKQLCjmFF7mQLjop-WQrt2Cbou0jLMNF-OAE';
+const BACKEND_URL = 'https://linkedroi-production.up.railway.app'; // e.g. https://linkedroi-server.railway.app
+
+// ── INIT SUPABASE ──
+const { createClient } = window.supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── APP STATE ──
+let currentUser = null;
+let posts = [];
+let leads = [];
+const STAGES = ['New lead','Contacted','Call booked','Closed won'];
+const STAGE_TAGS = {'New lead':'tag-purple','Contacted':'tag-gold','Call booked':'tag-teal','Closed won':'tag-green'};
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+
+db.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    const meta = session.user.user_metadata;
+    document.querySelector('.user-name').textContent = meta?.full_name || session.user.email.split('@')[0];
+    document.querySelector('.avatar').textContent = (meta?.full_name || session.user.email)[0].toUpperCase();
+    await loadData();
+  } else {
+    currentUser = null;
+    document.getElementById('authOverlay').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+  }
+});
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='signup')));
+  document.getElementById('loginForm').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab==='signup' ? 'block' : 'none';
+  document.getElementById('authError').style.display = 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return showAuthError('Please fill in all fields');
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Sign in';
+  if (error) showAuthError(error.message);
+}
+
+async function handleSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  if (!name || !email || !password) return showAuthError('Please fill in all fields');
+  if (password.length < 6) return showAuthError('Password must be at least 6 characters');
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  const { error } = await db.auth.signUp({ email, password, options: { data: { full_name: name } } });
+  btn.disabled = false; btn.textContent = 'Create account';
+  if (error) showAuthError(error.message);
+  else showAuthError('Check your email to confirm your account!');
+}
+
+async function handleLogout() {
+  await db.auth.signOut();
+  posts = []; leads = [];
+}
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
+
+async function loadData() {
+  showLoadingState();
+  await Promise.all([loadPosts(), loadLeads()]);
+  renderAll();
+  updateDashboardMetrics();
+}
+
+function showLoadingState() {
+  const grid = document.getElementById('postsGrid');
+  if (grid) grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading your data...</div></div>';
+}
+
+async function loadPosts() {
+  const { data, error } = await db
+    .from('posts')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('loadPosts:', error); return; }
+
+  posts = (data || []).map(p => ({
+    id: p.id,
+    display_id: p.display_id || p.id.slice(0,6).toUpperCase(),
+    title: p.title,
+    url: p.linkedin_url || '',
+    impressions: p.impressions || 0,
+    likes: p.likes || 0,
+    comments: p.comments || 0,
+    date: p.created_at?.split('T')[0] || '',
+    dest: p.destination_url || '#',
+    clicks: p.clicks_count || 0,
+    leads: p.leads_count || 0,
+    revenue: p.revenue || 0,
+    slug: p.slug
+  }));
+}
+
+async function loadLeads() {
+  const { data, error } = await db
+    .from('leads')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('loadLeads:', error); return; }
+
+  leads = (data || []).map(l => ({
+    id: l.id,
+    name: l.name,
+    email: l.email,
+    source: l.post_id,
+    stage: l.stage,
+    deal: l.deal_value || 0,
+    date: l.created_at?.split('T')[0] || ''
+  }));
+}
+
+function renderAll() {
+  renderPosts(); renderLeads(); renderPipeline(); renderLinks(); renderChart();
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD METRICS
+// ═══════════════════════════════════════════
+
+function updateDashboardMetrics() {
+  const totalRevenue = posts.reduce((s, p) => s + p.revenue, 0);
+  const totalLeads = leads.length;
+  const callsBooked = leads.filter(l => l.stage === 'Call booked' || l.stage === 'Closed won').length;
+  const activePosts = posts.length;
+
+  const revEl = document.getElementById('m-revenue');
+  if (revEl) revEl.textContent = '$' + totalRevenue.toLocaleString();
+
+  const metricVals = document.querySelectorAll('.metric-value');
+  if (metricVals[1]) metricVals[1].textContent = totalLeads;
+  if (metricVals[2]) metricVals[2].textContent = callsBooked;
+  if (metricVals[3]) metricVals[3].textContent = activePosts;
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  closeSidebar();
+  if (name === 'posts') renderPosts();
+  if (name === 'leads') renderLeads();
+  if (name === 'pipeline') renderPipeline();
+  if (name === 'links') renderLinks();
+  if (name === 'analytics') renderChart();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════
+// ADD POST MODAL
+// ═══════════════════════════════════════════
+
+function openModal() {
+  document.getElementById('addPostModal').classList.add('open');
+  document.getElementById('newPostDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('linkResult').style.display = 'none';
+}
+function closeModal() {
+  document.getElementById('addPostModal').classList.remove('open');
+  ['newPostUrl','newPostTitle','newPostImpressions','newPostLikes','newPostComments','newPostDest'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('linkResult').style.display = 'none';
+  document.querySelector('.form-footer .btn-primary').textContent = 'Generate smart link';
+  document.querySelector('.form-footer .btn-primary').onclick = addPost;
+}
+
+async function addPost() {
+  const title = document.getElementById('newPostTitle').value.trim();
+  const url = document.getElementById('newPostUrl').value.trim();
+  const dest = document.getElementById('newPostDest').value.trim();
+  if (!title) { showToast('Please enter a post title'); return; }
+
+  const slug = Math.random().toString(36).substr(2, 8);
+  const smartLink = BACKEND_URL + '/r/' + slug;
+
+  const { data, error } = await db.from('posts').insert({
+    user_id: currentUser.id,
+    title,
+    linkedin_url: url || null,
+    destination_url: dest || null,
+    slug,
+    impressions: parseInt(document.getElementById('newPostImpressions').value) || 0,
+    likes: parseInt(document.getElementById('newPostLikes').value) || 0,
+    comments: parseInt(document.getElementById('newPostComments').value) || 0,
+    clicks_count: 0,
+    leads_count: 0,
+    revenue: 0
+  }).select().single();
+
+  if (error) { showToast('Error saving post: ' + error.message); return; }
+
+  posts.unshift({
+    id: data.id,
+    display_id: data.id.slice(0,6).toUpperCase(),
+    title, url, impressions: data.impressions, likes: data.likes,
+    comments: data.comments, date: data.created_at?.split('T')[0],
+    dest, clicks: 0, leads: 0, revenue: 0, slug
+  });
+
+  document.getElementById('generatedLink').textContent = smartLink;
+  document.getElementById('linkResult').style.display = 'block';
+  document.querySelector('.form-footer .btn-primary').textContent = 'Close';
+  document.querySelector('.form-footer .btn-primary').onclick = closeModal;
+  showToast('Post saved — smart link generated!');
+  renderPosts(); renderLinks(); updateDashboardMetrics();
+}
+
+function copyLink() {
+  const txt = document.getElementById('generatedLink').textContent;
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  showToast('Smart link copied to clipboard!');
+}
+
+// ═══════════════════════════════════════════
+// ADD LEAD MODAL
+// ═══════════════════════════════════════════
+
+function openAddLeadModal() {
+  const sel = document.getElementById('leadSource');
+  sel.innerHTML = '<option value="">Unattributed</option>';
+  posts.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id;
+    o.textContent = (p.display_id || p.id.slice(0,6)) + ' — ' + p.title.slice(0,30);
+    sel.appendChild(o);
+  });
+  document.getElementById('addLeadModal').classList.add('open');
+}
+function closeAddLeadModal() { document.getElementById('addLeadModal').classList.remove('open'); }
+
+async function addLead() {
+  const name = document.getElementById('leadName').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  if (!name || !email) { showToast('Name and email required'); return; }
+
+  const postId = document.getElementById('leadSource').value || null;
+  const stage = document.getElementById('leadStage').value;
+  const dealValue = parseInt(document.getElementById('leadDeal').value) || 0;
+
+  const { data, error } = await db.from('leads').insert({
+    user_id: currentUser.id,
+    post_id: postId,
+    name, email, stage,
+    deal_value: dealValue
+  }).select().single();
+
+  if (error) { showToast('Error saving lead: ' + error.message); return; }
+
+  // Update leads_count on post
+  if (postId) {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      post.leads = (post.leads || 0) + 1;
+      await db.from('posts').update({ leads_count: post.leads }).eq('id', postId);
+    }
+  }
+
+  leads.unshift({ id: data.id, name, email, source: postId, stage, deal: dealValue, date: data.created_at?.split('T')[0] });
+  closeAddLeadModal();
+  renderLeads(); renderPipeline(); updateDashboardMetrics();
+  showToast('Lead added successfully!');
+}
+
+// ═══════════════════════════════════════════
+// RENDER POSTS
+// ═══════════════════════════════════════════
+
+function renderPosts(filter='') {
+  const grid = document.getElementById('postsGrid');
+  const filtered = posts.filter(p => !filter || p.title.toLowerCase().includes(filter));
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div><div class="empty-sub">Add your first LinkedIn post above</div></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const did = p.display_id || p.id.slice(0,6).toUpperCase();
+    return `
+    <div class="post-row">
+      <div class="post-row-left">
+        <div class="post-row-title">${p.title}</div>
+        <div class="post-row-meta">
+          <span class="post-meta-item">📅 ${p.date}</span>
+          <span class="post-meta-item">👁 ${p.impressions.toLocaleString()} impressions</span>
+          <span class="post-meta-item">❤️ ${p.likes} likes</span>
+          <span class="post-meta-item">💬 ${p.comments} comments</span>
+          <span class="tag tag-purple">${did}</span>
+        </div>
+        <div class="post-link-row">
+          <span class="link-pill" onclick="copySmartLink('${p.id}')" title="Click to copy">
+            ${BACKEND_URL}/r/${p.slug} · ${p.clicks} clicks
+          </span>
+          <button class="btn btn-ghost btn-sm" onclick="copySmartLink('${p.id}')">Copy link</button>
+        </div>
+      </div>
+      <div class="post-row-stats">
+        <div class="post-stat"><div class="post-stat-val">${p.leads}</div><div class="post-stat-label">Leads</div></div>
+        <div class="post-stat"><div class="post-stat-val" style="color:var(--green2)">${p.revenue ? '$'+p.revenue.toLocaleString() : '—'}</div><div class="post-stat-label">Revenue</div></div>
+        <div class="post-stat"><div class="post-stat-val">${p.impressions > 0 ? (p.leads/p.impressions*100).toFixed(1)+'%' : '—'}</div><div class="post-stat-label">CVR</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterPosts() { renderPosts(document.getElementById('postSearch').value.toLowerCase()); }
+
+function copySmartLink(postId) {
+  const p = posts.find(x => x.id === postId);
+  if (!p) return;
+  const link = BACKEND_URL + '/r/' + p.slug;
+  navigator.clipboard.writeText(link).catch(()=>{});
+  showToast('Smart link copied!');
+}
+
+// ═══════════════════════════════════════════
+// RENDER LEADS
+// ═══════════════════════════════════════════
+
+function renderLeads(filter='') {
+  const tbody = document.getElementById('leadsTableBody');
+  const filtered = leads.filter(l => !filter || l.name.toLowerCase().includes(filter) || l.email.toLowerCase().includes(filter));
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No leads yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(l => {
+    const post = posts.find(p => p.id === l.source);
+    const did = post ? (post.display_id || post.id.slice(0,6).toUpperCase()) : null;
+    return `<tr>
+      <td><div style="font-weight:500;color:white">${l.name}</div></td>
+      <td style="color:var(--muted2)">${l.email}</td>
+      <td>${post ? `<span class="tag tag-purple">${did}</span> <span style="font-size:11px;color:var(--muted)">${post.title.slice(0,22)}…</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><span class="tag ${STAGE_TAGS[l.stage]||'tag-gray'}">${l.stage}</span></td>
+      <td class="revenue-cell">${l.deal ? '$'+l.deal.toLocaleString() : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="color:var(--muted);font-size:12px">${l.date}</td>
+      <td>
+        <select class="form-select" style="padding:4px 8px;font-size:12px;width:130px" onchange="updateLeadStage('${l.id}', this.value)">
+          ${STAGES.map(s => `<option ${s===l.stage?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterLeads(v) { renderLeads(v.toLowerCase()); }
+
+async function updateLeadStage(id, stage) {
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+
+  if (stage === 'Closed won' && !lead.deal) {
+    const val = prompt('Enter deal value ($):');
+    if (val) {
+      lead.deal = parseInt(val) || 0;
+      // Update post revenue
+      if (lead.source) {
+        const post = posts.find(p => p.id === lead.source);
+        if (post) {
+          post.revenue = (post.revenue || 0) + lead.deal;
+          await db.from('posts').update({ revenue: post.revenue }).eq('id', lead.source);
+        }
+      }
+    }
+  }
+
+  lead.stage = stage;
+  const { error } = await db.from('leads').update({ stage, deal_value: lead.deal }).eq('id', id);
+  if (error) { showToast('Error updating stage'); return; }
+
+  renderLeads(); renderPipeline(); updateDashboardMetrics();
+  showToast(lead.name + ' moved to "' + stage + '"');
+}
+
+// ═══════════════════════════════════════════
+// RENDER PIPELINE
+// ═══════════════════════════════════════════
+
+function renderPipeline() {
+  const container = document.getElementById('pipelineFull');
+  container.innerHTML = STAGES.map(stage => {
+    const stageLeads = leads.filter(l => l.stage === stage);
+    const total = stageLeads.reduce((s, l) => s + l.deal, 0);
+    return `<div class="pipeline-col">
+      <div class="pipeline-header">
+        <span class="pipeline-stage-name">${stage}</span>
+        <span class="pipeline-count-badge">${stageLeads.length}</span>
+      </div>
+      ${stage === 'Closed won' && total ? `<div class="pipeline-total">$${total.toLocaleString()}</div>` : ''}
+      <div class="pipeline-items">
+        ${stageLeads.length ? stageLeads.map(l => {
+          const post = posts.find(p => p.id === l.source);
+          const did = post ? (post.display_id || post.id.slice(0,6).toUpperCase()) : null;
+          const nextStage = STAGES[STAGES.indexOf(stage)+1];
+          return `<div class="lead-card-mini">
+            <div class="lead-name">${l.name}</div>
+            <div class="lead-meta">
+              ${l.source && did ? `<span class="tag tag-purple" style="font-size:9px">${did}</span>` : '<span style="font-size:11px;color:var(--muted)">no post</span>'}
+              ${l.deal ? `<span class="lead-revenue">$${l.deal.toLocaleString()}</span>` : ''}
+            </div>
+            ${nextStage ? `<button class="lead-stage-btn" style="margin-top:7px;font-size:10px" onclick="updateLeadStage('${l.id}','${nextStage}')">Move to ${nextStage} →</button>` : ''}
+          </div>`;
+        }).join('') : '<div style="padding:16px;font-size:12px;color:var(--muted);text-align:center">No leads here</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER LINKS
+// ═══════════════════════════════════════════
+
+function renderLinks() {
+  const tbody = document.getElementById('linksTableBody');
+  if (!posts.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No links yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = posts.map(p => `<tr>
+    <td><span class="link-pill" onclick="copySmartLink('${p.id}')" style="max-width:160px">${BACKEND_URL}/r/${p.slug}</span></td>
+    <td><span class="tag tag-purple">${p.display_id || p.id.slice(0,6).toUpperCase()}</span></td>
+    <td style="font-size:12px;color:var(--muted2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.dest||'—'}</td>
+    <td style="font-family:var(--font-mono)">${p.clicks.toLocaleString()}</td>
+    <td>${p.leads}</td>
+    <td class="revenue-cell">${p.revenue ? '$'+p.revenue.toLocaleString() : '<span style="color:var(--muted)">—</span>'}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER CHART
+// ═══════════════════════════════════════════
+
+function renderChart() {
+  const container = document.getElementById('revenueChart');
+  const withRevenue = posts.filter(p => p.revenue > 0);
+  if (!withRevenue.length) {
+    container.innerHTML = '<div style="width:100%;text-align:center;color:var(--muted);font-size:13px;padding:40px 0">No revenue data yet</div>';
+    return;
+  }
+  const maxRev = Math.max(...withRevenue.map(p => p.revenue));
+  const colors = ['accent','teal','gold','coral','accent','teal'];
+  container.innerHTML = withRevenue.map((p, i) => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar ${colors[i]||'accent'}" style="height:${Math.round(p.revenue/maxRev*140)}px" title="${p.title}&#10;$${p.revenue.toLocaleString()}"></div>
+      <div class="chart-label">${p.display_id || p.id.slice(0,6).toUpperCase()}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// ATTRIBUTION TOGGLE
+// ═══════════════════════════════════════════
+
+function setAttr(btn, model) {
+  const parent = btn.closest('.attr-toggle');
+  parent.querySelectorAll('.attr-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const totalRev = posts.reduce((s, p) => s + p.revenue, 0);
+  const revenueMap = {
+    first: '$' + Math.round(totalRev * 1.05).toLocaleString(),
+    last:  '$' + Math.round(totalRev * 0.95).toLocaleString(),
+    linear:'$' + totalRev.toLocaleString()
+  };
+  const revEl = document.getElementById('m-revenue');
+  if (revenueMap[model] && revEl) revEl.textContent = revenueMap[model];
+}
+
+function selectAttrModel(card, model) {
+  document.querySelectorAll('.attr-model-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  showToast('Attribution switched to ' + model + '-touch');
+  renderChart();
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════
+// INIT — check existing session
+// ═══════════════════════════════════════════
+
+(async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) {
+    document.getElementById('authOverlay').style.display = 'flex';
+  }
+})();
+</script>
+</head>
+<body>
+<!-- AUTH OVERLAY -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-mark">L</div>
+      <div class="logo-text">Linked<span>ROI</span></div>
+    </div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Track which LinkedIn posts make you money</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Create account</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+      </div>
+      <button class="auth-btn" id="loginBtn" onclick="handleLogin()">Sign in</button>
+    </div>
+    <div id="signupForm" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <input type="text" class="form-input" id="signupName" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="signupPassword" placeholder="Min 6 characters">
+      </div>
+      <button class="auth-btn" id="signupBtn" onclick="handleSignup()">Create account</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">L</div>
+    <div class="logo-text">Linked<span>ROI</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <button class="nav-item active" onclick="showPage('dashboard', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".3"/></svg></span>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('analytics', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12L5.5 8L8.5 10L12 5L14 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      Analytics
+    </button>
+
+    <div class="nav-label">Content</div>
+    <button class="nav-item" onclick="showPage('posts', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      Posts
+      <span class="nav-badge">12</span>
+    </button>
+    <button class="nav-item" onclick="showPage('links', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.5 9.5a4 4 0 0 0 5.657 0l1.414-1.414a4 4 0 0 0-5.657-5.657L7.5 3.843" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9.5 6.5a4 4 0 0 0-5.657 0L2.43 7.914a4 4 0 0 0 5.657 5.657l.414-.414" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      Smart Links
+    </button>
+
+    <div class="nav-label">Revenue</div>
+    <button class="nav-item" onclick="showPage('leads', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      Leads
+      <span class="nav-badge">34</span>
+    </button>
+    <button class="nav-item" onclick="showPage('pipeline', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h3v8H2zM6.5 4h3v8h-3zM11 4h3v8h-3z" stroke="currentColor" stroke-width="1.3" rx="1"/></svg></span>
+      Pipeline
+    </button>
+
+    <div class="nav-label">Settings</div>
+    <button class="nav-item" onclick="showPage('integrations', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V3zM2 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3zM2 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 4h4M4 6v4M11 6v2a2 2 0 0 1-2 2H8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      Integrations
+    </button>
+    <button class="nav-item" onclick="showPage('settings', this)">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+      Settings
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">YK</div>
+      <div class="user-info">
+        <div class="user-name">Yash Kumar</div>
+        <div class="user-plan">⭐ Pro Plan</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-bar" style="display:none" id="searchBar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search..." id="searchInput" oninput="handleSearch()">
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Add Post
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD PAGE ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Revenue overview</div>
+          <div class="section-sub">Last 30 days · First-touch attribution</div>
+        </div>
+        <div class="attr-toggle">
+          <button class="attr-btn active" onclick="setAttr(this,'first')">First touch</button>
+          <button class="attr-btn" onclick="setAttr(this,'last')">Last touch</button>
+          <button class="attr-btn" onclick="setAttr(this,'linear')">Linear</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" style="--card-accent:var(--green)">
+          <div class="metric-icon">$</div>
+          <div class="metric-label">Revenue attributed</div>
+          <div class="metric-value" id="m-revenue">$4,520</div>
+          <div class="metric-delta delta-up">↑ 18% vs last month</div>
+        </div>
+        <div class="metric-card" style="--card-accent:var(--accent)">
+          <div class="metric-icon">👤</div>
+          <div class="metric-label">Leads captured</div>
+          <div class="metric-value">34</div>
+          <div class="metric-delta delta-up">↑ 11 new this week</div>
+        </div>
+        <div class="metric-card" style="--card-accent:var(--gold)">
+          <div class="metric-icon">📅</div>
+          <div class="metric-label">Calls booked</div>
+          <div class="metric-value">11</div>
+          <div class="metric-delta delta-neutral">32% lead → call rate</div>
+        </div>
+        <div class="metric-card" style="--card-accent:var(--teal)">
+          <div class="metric-icon">📝</div>
+          <div class="metric-label">Active posts</div>
+          <div class="metric-value">12</div>
+          <div class="metric-delta delta-up">↑ 3 added this week</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Top posts -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top posts by revenue</div>
+            <div class="attr-toggle" style="transform:scale(0.9);transform-origin:right">
+              <button class="attr-btn active" onclick="setAttr(this,'30d')">30d</button>
+              <button class="attr-btn" onclick="setAttr(this,'90d')">90d</button>
+              <button class="attr-btn" onclick="setAttr(this,'all')">All</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Post</th>
+                <th>Impressions</th>
+                <th>Leads</th>
+                <th>Calls</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="post-title-cell">How I closed $60K using LinkedIn only</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apr 12 · <span class="tag tag-green" style="font-size:9px">First touch</span></div></td>
+                <td style="font-family:var(--font-mono)">12.4K</td>
+                <td>8</td>
+                <td>4</td>
+                <td class="revenue-cell">$1400</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">3 mistakes SaaS founders make with cold outreach</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apr 8</div></td>
+                <td style="font-family:var(--font-mono)">8.1K</td>
+                <td>5</td>
+                <td>3</td>
+                <td class="revenue-cell">$1,080</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">Why cold DMs fail (and what to do instead)</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Apr 2</div></td>
+                <td style="font-family:var(--font-mono)">5.6K</td>
+                <td>4</td>
+                <td>2</td>
+                <td class="revenue-cell">$840</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">My exact outreach script (copy it free)</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Mar 28</div></td>
+                <td style="font-family:var(--font-mono)">3.2K</td>
+                <td>2</td>
+                <td>1</td>
+                <td class="revenue-cell">$400</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">The LinkedIn framework that got me 100 leads</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Mar 20</div></td>
+                <td style="font-family:var(--font-mono)">2.8K</td>
+                <td>2</td>
+                <td>1</td>
+                <td class="revenue-cell">$5,000</td>
+              </tr>
+              <tr>
+                <td><div class="post-title-cell">How to write a LinkedIn post that converts</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Mar 15</div></td>
+                <td style="font-family:var(--font-mono)">1.9K</td>
+                <td>1</td>
+                <td>0</td>
+                <td class="revenue-cell" style="color:var(--muted)">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Funnel -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Conversion funnel</div>
+          </div>
+          <div class="card-body">
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">👁 Impressions</span>
+                <span class="funnel-count">42,000</span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:100%;background:var(--accent)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">🔗 Link clicks</span>
+                <span class="funnel-count">1,260 <span class="funnel-pct">3.0%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:60%;background:var(--teal)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">📋 Leads</span>
+                <span class="funnel-count">34 <span class="funnel-pct">2.7%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:30%;background:var(--gold)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">📅 Calls booked</span>
+                <span class="funnel-count">11 <span class="funnel-pct">32.4%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:18%;background:var(--coral)"></div></div>
+            </div>
+            <div class="funnel-item">
+              <div class="funnel-row">
+                <span class="funnel-label">🏆 Deals closed</span>
+                <span class="funnel-count">6 <span class="funnel-pct">54.5%</span></span>
+              </div>
+              <div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:10%;background:var(--green)"></div></div>
+            </div>
+
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:12px;color:var(--muted)">Avg deal size</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:var(--green2);font-weight:500">$840</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:12px;color:var(--muted)">Cost per lead</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:white;font-weight:500">$0</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:12px;color:var(--muted)">Revenue per impression</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:white;font-weight:500">$0.12</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline mini on dashboard -->
+      <div class="section-header" style="margin-top:8px">
+        <div>
+          <div class="section-title">Live pipeline</div>
+          <div class="section-sub">Lead stages across all posts</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('pipeline', document.querySelector('.nav-item:nth-child(6))'))">View all →</button>
+      </div>
+
+      <div class="pipeline-grid">
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">New lead</span>
+            <span class="pipeline-count-badge">12</span>
+          </div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Priya Sharma</div>
+              <div class="lead-meta"><span>post #P001</span><span>2h ago</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Rohan Mehta</div>
+              <div class="lead-meta"><span>post #P003</span><span>5h ago</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">Contacted</span>
+            <span class="pipeline-count-badge">8</span>
+          </div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Rahul Mishra</div>
+              <div class="lead-meta"><span>post #P007</span><span>1d ago</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Sneha Patel</div>
+              <div class="lead-meta"><span>post #P002</span><span>2d ago</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">Call booked</span>
+            <span class="pipeline-count-badge">11</span>
+          </div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Anjali Kapoor</div>
+              <div class="lead-meta"><span>post #P001</span><span class="tag tag-gold" style="font-size:9px">Calendly</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Dev Agarwal</div>
+              <div class="lead-meta"><span>post #P003</span><span class="tag tag-gold" style="font-size:9px">Calendly</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-header">
+            <span class="pipeline-stage-name">Closed won</span>
+            <span class="pipeline-count-badge">6</span>
+          </div>
+          <div class="pipeline-total">$2,760 total</div>
+          <div class="pipeline-items">
+            <div class="lead-card-mini">
+              <div class="lead-name">Vikram Pande</div>
+              <div class="lead-meta"><span class="lead-revenue">$840</span><span>post #P001</span></div>
+            </div>
+            <div class="lead-card-mini">
+              <div class="lead-name">Meera Joshi</div>
+              <div class="lead-meta"><span class="lead-revenue">$1,080</span><span>post #P002</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ POSTS PAGE ═══ -->
+  <div class="page" id="page-posts">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Posts</div>
+          <div class="section-sub">All tracked LinkedIn posts with attribution data</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search posts..." id="postSearch" oninput="filterPosts()">
+          </div>
+          <button class="btn btn-primary" onclick="openModal()">+ Add post</button>
+        </div>
+      </div>
+
+      <div class="posts-grid" id="postsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SMART LINKS PAGE ═══ -->
+  <div class="page" id="page-links">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Smart links</div>
+          <div class="section-sub">UTM-tagged short links generated from your posts</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Active links</div>
+          <span style="font-size:12px;color:var(--muted)">All links auto-append ?source=linkedin&post_id=…</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Short URL</th>
+              <th>Post</th>
+              <th>Destination</th>
+              <th>Clicks</th>
+              <th>Leads</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody id="linksTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LEADS PAGE ═══ -->
+  <div class="page" id="page-leads">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Leads</div>
+          <div class="section-sub">All captured leads with source attribution</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search leads..." oninput="filterLeads(this.value)">
+          </div>
+          <button class="btn btn-primary" onclick="openAddLeadModal()">+ Add lead</button>
+        </div>
+      </div>
+
+      <div class="leads-table-wrap">
+        <table class="data-table" id="leadsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Source post</th>
+              <th>Stage</th>
+              <th>Deal value</th>
+              <th>Added</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PIPELINE PAGE ═══ -->
+  <div class="page" id="page-pipeline">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Pipeline</div>
+          <div class="section-sub">Drag leads through stages (click stage button to advance)</div>
+        </div>
+      </div>
+      <div class="pipeline-grid" id="pipelineFull" style="margin-bottom:0">
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANALYTICS PAGE ═══ -->
+  <div class="page" id="page-analytics">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Revenue analytics</div>
+          <div class="section-sub">Attribution models and post performance over time</div>
+        </div>
+      </div>
+
+      <!-- Attribution model select -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+        <div class="attr-model-card selected" onclick="selectAttrModel(this,'first')">
+          <div class="attr-model-name">First touch</div>
+          <div class="attr-model-desc">100% credit to the post that first brought the lead</div>
+        </div>
+        <div class="attr-model-card" onclick="selectAttrModel(this,'last')">
+          <div class="attr-model-name">Last touch</div>
+          <div class="attr-model-desc">100% credit to the post viewed just before conversion</div>
+        </div>
+        <div class="attr-model-card" onclick="selectAttrModel(this,'linear')">
+          <div class="attr-model-name">Linear</div>
+          <div class="attr-model-desc">Revenue split equally across all touchpoint posts</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Revenue by post chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Revenue by post</div>
+            <span class="tag tag-purple">First touch model</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-area" id="revenueChart">
+              <!-- Populated by JS -->
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">Click a bar to drill into that post</div>
+          </div>
+        </div>
+
+        <!-- Metrics breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Post benchmarks</div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;color:var(--muted)">Avg impressions / post</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:white">5,600</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;color:var(--muted)">Avg leads / post</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:white">2.8</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                  <span style="font-size:12px;color:var(--muted)">Avg revenue / post</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:var(--green2)">$420</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                  <span style="font-size:12px;color:var(--muted)">Best post revenue</span>
+                  <span style="font-family:var(--font-mono);font-size:13px;color:var(--gold2)">$1,700</span>
+                </div>
+              </div>
+
+              <div style="border-top:1px solid var(--line);padding-top:14px">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Top topics by revenue</div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden"><div style="width:80%;height:100%;background:var(--accent);border-radius:3px"></div></div>
+                    <span style="font-size:11px;color:var(--muted2);min-width:80px">Case studies</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--green2)">$1,700</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden"><div style="width:55%;height:100%;background:var(--teal);border-radius:3px"></div></div>
+                    <span style="font-size:11px;color:var(--muted2);min-width:80px">Outreach tips</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--green2)">$1,080</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;background:var(--surface3);border-radius:3px;height:4px;overflow:hidden"><div style="width:35%;height:100%;background:var(--gold);border-radius:3px"></div></div>
+                    <span style="font-size:11px;color:var(--muted2);min-width:80px">Mistakes posts</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--green2)">$840</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INTEGRATIONS PAGE ═══ -->
+  <div class="page" id="page-integrations">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Integrations</div>
+          <div class="section-sub">Connect your favourite tools to sync data automatically</div>
+        </div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(0,200,150,0.1)">📅</div>
+            <div>
+              <div class="int-name">Calendly</div>
+              <div class="int-desc">Auto-update lead stage to "Call booked" when meeting is scheduled</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-connected">● Connected</span>
+            <button class="btn btn-ghost btn-sm">Configure</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(255,110,60,0.1)">🔶</div>
+            <div>
+              <div class="int-name">HubSpot CRM</div>
+              <div class="int-desc">Sync leads and deal stages bi-directionally with HubSpot</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-soon">Disconnected</span>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('HubSpot OAuth initiated')">Connect</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(0,160,240,0.1)">☁️</div>
+            <div>
+              <div class="int-name">Salesforce</div>
+              <div class="int-desc">Push closed deals and contact records to Salesforce automatically</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-soon">Disconnected</span>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Salesforce OAuth initiated')">Connect</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(108,99,255,0.1)">🔗</div>
+            <div>
+              <div class="int-name">Zapier / Make</div>
+              <div class="int-desc">Use webhooks to connect with 1000+ apps via automation platforms</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-connected">● Active</span>
+            <button class="btn btn-ghost btn-sm">View webhooks</button>
+          </div>
+        </div>
+        <div class="integration-card">
+          <div class="int-left">
+            <div class="int-icon" style="background:rgba(245,200,66,0.1)">⚡</div>
+            <div>
+              <div class="int-name">Notion</div>
+              <div class="int-desc">Export lead and revenue data to a Notion database automatically</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="int-badge int-soon">Coming soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETTINGS PAGE ═══ -->
+  <div class="page" id="page-settings">
+    <div class="page-body">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Settings</div>
+          <div class="section-sub">Account preferences and configuration</div>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="settings-card-title">Attribution defaults</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Default attribution model</div>
+              <div class="settings-row-sub">Applied across all dashboard views</div>
+            </div>
+            <select class="form-select" style="width:140px">
+              <option>First touch</option>
+              <option>Last touch</option>
+              <option>Linear</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Currency</div>
+              <div class="settings-row-sub">Used for all revenue display</div>
+            </div>
+            <select class="form-select" style="width:100px">
+              <option>$ INR</option>
+              <option selected>$ USD</option>
+              <option>€ EUR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Notifications</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">New lead alert</div>
+              <div class="settings-row-sub">Email when a new lead is captured</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Call booked alert</div>
+              <div class="settings-row-sub">Notify when Calendly webhook fires</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Weekly digest</div>
+              <div class="settings-row-sub">Revenue summary every Monday</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Lead capture form</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Show "Powered by LinkedROI"</div>
+              <div class="settings-row-sub">Branding on your embedded lead forms</div>
+            </div>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Your form URL</div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--accent3)">lnkd.roi/f/yash</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ADD POST MODAL -->
+<div class="modal-overlay" id="addPostModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add LinkedIn post</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">LinkedIn post URL</label>
+        <input type="url" class="form-input" id="newPostUrl" placeholder="https://linkedin.com/feed/update/...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Post title / description</label>
+        <input type="text" class="form-input" id="newPostTitle" placeholder="What's this post about?">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Impressions</label>
+          <input type="number" class="form-input" id="newPostImpressions" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Post date</label>
+          <input type="date" class="form-input" id="newPostDate">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Likes</label>
+          <input type="number" class="form-input" id="newPostLikes" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comments</label>
+          <input type="number" class="form-input" id="newPostComments" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Destination URL (your landing page / Calendly)</label>
+        <input type="url" class="form-input" id="newPostDest" placeholder="https://yoursite.com/get-started">
+      </div>
+
+      <div class="link-result" id="linkResult" style="display:none">
+        <div class="link-result-label">Your smart link is ready</div>
+        <div class="link-result-url" id="generatedLink"></div>
+        <button class="link-copy-btn" onclick="copyLink()">Copy link</button>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addPost()">Generate smart link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LEAD MODAL -->
+<div class="modal-overlay" id="addLeadModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add lead manually</div>
+      <button class="modal-close" onclick="closeAddLeadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="leadName" placeholder="Priya Sharma">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="leadEmail" placeholder="priya@company.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Source post</label>
+          <select class="form-select" id="leadSource">
+            <option value="">Unattributed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stage</label>
+          <select class="form-select" id="leadStage">
+            <option>New lead</option>
+            <option>Contacted</option>
+            <option>Call booked</option>
+            <option>Closed won</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deal value ($) — optional</label>
+        <input type="number" class="form-input" id="leadDeal" placeholder="0">
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="closeAddLeadModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addLead()">Save lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastMsg">Copied to clipboard!</span>
+</div>
+
+<script>
+// ── DATA STORE ──
+let posts = [
+  { id:'P001', title:'How I closed $60K using LinkedIn only', url:'https://linkedin.com/feed/update/abc123', impressions:12400, likes:342, comments:89, date:'2024-04-12', dest:'https://yash.com/call', clicks:380, leads:8, revenue:1700 },
+  { id:'P002', title:'3 mistakes SaaS founders make with cold outreach', url:'https://linkedin.com/feed/update/abc456', impressions:8100, likes:218, comments:56, date:'2024-04-08', dest:'https://yash.com/guide', clicks:220, leads:5, revenue:1080 },
+  { id:'P003', title:'Why cold DMs fail (and what to do instead)', url:'https://linkedin.com/feed/update/abc789', impressions:5600, likes:178, comments:34, date:'2024-04-02', dest:'https://yash.com/call', clicks:160, leads:4, revenue:840 },
+  { id:'P004', title:'My exact outreach script (copy it free)', url:'https://linkedin.com/feed/update/abd001', impressions:3200, likes:124, comments:28, date:'2024-03-28', dest:'https://yash.com/script', clicks:98, leads:2, revenue:480 },
+  { id:'P005', title:'The LinkedIn framework that got me 100 leads', url:'https://linkedin.com/feed/update/abd002', impressions:2800, likes:98, comments:22, date:'2024-03-20', dest:'https://yash.com/framework', clicks:72, leads:2, revenue:420 },
+  { id:'P006', title:'How to write a LinkedIn post that converts', url:'https://linkedin.com/feed/update/abd003', impressions:1900, likes:67, comments:15, date:'2024-03-15', dest:'https://yash.com/call', clicks:44, leads:1, revenue:0 },
+];
+
+let leads = [
+  { id:'L001', name:'Priya Sharma', email:'priya@startup.io', source:'P001', stage:'New lead', deal:0, date:'2024-04-15' },
+  { id:'L002', name:'Rohan Mehta', email:'rohan@agency.in', source:'P003', stage:'New lead', deal:0, date:'2024-04-15' },
+  { id:'L003', name:'Rahul Mishra', email:'rahul@tech.com', source:'P002', stage:'Contacted', deal:0, date:'2024-04-14' },
+  { id:'L004', name:'Sneha Patel', email:'sneha@brand.in', source:'P001', stage:'Contacted', deal:0, date:'2024-04-13' },
+  { id:'L005', name:'Anjali Kapoor', email:'anjali@corp.in', source:'P001', stage:'Call booked', deal:0, date:'2024-04-12' },
+  { id:'L006', name:'Dev Agarwal', email:'dev@saas.io', source:'P003', stage:'Call booked', deal:0, date:'2024-04-11' },
+  { id:'L007', name:'Vikram Pande', email:'vikram@ltd.com', source:'P001', stage:'Closed won', deal:840, date:'2024-04-10' },
+  { id:'L008', name:'Meera Joshi', email:'meera@vc.in', source:'P002', stage:'Closed won', deal:1080, date:'2024-04-09' },
+  { id:'L009', name:'Karan Shah', email:'karan@firm.in', source:'P003', stage:'Closed won', deal:840, date:'2024-04-08' },
+];
+
+const STAGES = ['New lead','Contacted','Call booked','Closed won'];
+const STAGE_TAGS = {'New lead':'tag-purple','Contacted':'tag-gold','Call booked':'tag-teal','Closed won':'tag-green'};
+
+// ── NAVIGATION ──
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  closeSidebar();
+
+  if (name === 'posts') renderPosts();
+  if (name === 'leads') renderLeads();
+  if (name === 'pipeline') renderPipeline();
+  if (name === 'links') renderLinks();
+  if (name === 'analytics') renderChart();
+}
+
+// ── SIDEBAR MOBILE ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── MODAL ──
+function openModal() {
+  document.getElementById('addPostModal').classList.add('open');
+  document.getElementById('newPostDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('linkResult').style.display = 'none';
+}
+function closeModal() {
+  document.getElementById('addPostModal').classList.remove('open');
+  ['newPostUrl','newPostTitle','newPostImpressions','newPostLikes','newPostComments','newPostDest'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('linkResult').style.display = 'none';
+}
+
+function addPost() {
+  const title = document.getElementById('newPostTitle').value.trim();
+  const url = document.getElementById('newPostUrl').value.trim();
+  const dest = document.getElementById('newPostDest').value.trim();
+  if (!title) { showToast('Please enter a post title'); return; }
+
+  const id = 'P' + String(posts.length+1).padStart(3,'0');
+  const slug = Math.random().toString(36).substr(2,6);
+  const smartLink = `https://lnkd.roi/r/${slug}?source=linkedin&post_id=${id}`;
+
+  posts.unshift({
+    id, title, url: url||'https://linkedin.com/feed/update/'+id,
+    impressions: parseInt(document.getElementById('newPostImpressions').value)||0,
+    likes: parseInt(document.getElementById('newPostLikes').value)||0,
+    comments: parseInt(document.getElementById('newPostComments').value)||0,
+    date: document.getElementById('newPostDate').value,
+    dest: dest||'#',
+    clicks:0, leads:0, revenue:0, slug
+  });
+
+  document.getElementById('generatedLink').textContent = smartLink;
+  document.getElementById('linkResult').style.display = 'block';
+  document.querySelector('.form-footer .btn-primary').textContent = 'Close';
+  document.querySelector('.form-footer .btn-primary').onclick = closeModal;
+  showToast('Post added — smart link generated!');
+  renderPosts();
+  renderLinks();
+}
+
+function copyLink() {
+  const txt = document.getElementById('generatedLink').textContent;
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  showToast('Smart link copied to clipboard!');
+}
+
+// ── ADD LEAD MODAL ──
+function openAddLeadModal() {
+  const sel = document.getElementById('leadSource');
+  sel.innerHTML = '<option value="">Unattributed</option>';
+  posts.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.id+' — '+p.title.slice(0,30); sel.appendChild(o); });
+  document.getElementById('addLeadModal').classList.add('open');
+}
+function closeAddLeadModal() { document.getElementById('addLeadModal').classList.remove('open'); }
+
+function addLead() {
+  const name = document.getElementById('leadName').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  if (!name || !email) { showToast('Name and email required'); return; }
+  const id = 'L'+String(leads.length+1).padStart(3,'0');
+  leads.unshift({
+    id, name, email,
+    source: document.getElementById('leadSource').value,
+    stage: document.getElementById('leadStage').value,
+    deal: parseInt(document.getElementById('leadDeal').value)||0,
+    date: new Date().toISOString().split('T')[0]
+  });
+  closeAddLeadModal();
+  renderLeads();
+  showToast('Lead added successfully!');
+}
+
+// ── RENDER POSTS ──
+function renderPosts(filter='') {
+  const grid = document.getElementById('postsGrid');
+  const filtered = posts.filter(p => !filter || p.title.toLowerCase().includes(filter));
+  if (!filtered.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No posts found</div><div class="empty-sub">Add your first LinkedIn post</div></div>'; return; }
+  grid.innerHTML = filtered.map(p => `
+    <div class="post-row">
+      <div class="post-row-left">
+        <div class="post-row-title">${p.title}</div>
+        <div class="post-row-meta">
+          <span class="post-meta-item">📅 ${p.date}</span>
+          <span class="post-meta-item">👁 ${p.impressions.toLocaleString()} impressions</span>
+          <span class="post-meta-item">❤️ ${p.likes} likes</span>
+          <span class="post-meta-item">💬 ${p.comments} comments</span>
+          <span class="tag tag-purple">${p.id}</span>
+        </div>
+        <div class="post-link-row">
+          <span class="link-pill" onclick="copySmartLink('${p.id}')" title="Click to copy">
+            lnkd.roi/r/${p.slug||'go'+p.id.slice(1)} · ${p.clicks} clicks
+          </span>
+          <button class="btn btn-ghost btn-sm" onclick="copySmartLink('${p.id}')">Copy link</button>
+        </div>
+      </div>
+      <div class="post-row-stats">
+        <div class="post-stat">
+          <div class="post-stat-val">${p.leads}</div>
+          <div class="post-stat-label">Leads</div>
+        </div>
+        <div class="post-stat">
+          <div class="post-stat-val" style="color:var(--green2)">${p.revenue ? '$'+p.revenue.toLocaleString() : '—'}</div>
+          <div class="post-stat-label">Revenue</div>
+        </div>
+        <div class="post-stat">
+          <div class="post-stat-val">${p.impressions > 0 ? (p.leads/p.impressions*100).toFixed(1)+'%' : '—'}</div>
+          <div class="post-stat-label">CVR</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterPosts() { renderPosts(document.getElementById('postSearch').value.toLowerCase()); }
+
+function copySmartLink(postId) {
+  const p = posts.find(x => x.id===postId);
+  const slug = p?.slug || 'go'+postId.slice(1);
+  const link = `https://lnkd.roi/r/${slug}?source=linkedin&post_id=${postId}`;
+  navigator.clipboard.writeText(link).catch(()=>{});
+  showToast('Smart link copied!');
+}
+
+// ── RENDER LEADS ──
+function renderLeads(filter='') {
+  const tbody = document.getElementById('leadsTableBody');
+  const filtered = leads.filter(l => !filter || l.name.toLowerCase().includes(filter) || l.email.toLowerCase().includes(filter));
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No leads found</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(l => {
+    const post = posts.find(p => p.id===l.source);
+    return `<tr>
+      <td><div style="font-weight:500;color:white">${l.name}</div></td>
+      <td style="color:var(--muted2)">${l.email}</td>
+      <td>${post ? `<span class="tag tag-purple">${l.source}</span> <span style="font-size:11px;color:var(--muted)">${post.title.slice(0,22)}…</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><span class="tag ${STAGE_TAGS[l.stage]||'tag-gray'}">${l.stage}</span></td>
+      <td class="revenue-cell">${l.deal ? '$'+l.deal.toLocaleString() : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="color:var(--muted);font-size:12px">${l.date}</td>
+      <td>
+        <select class="form-select" style="padding:4px 8px;font-size:12px;width:130px" onchange="updateLeadStage('${l.id}', this.value)">
+          ${STAGES.map(s => `<option ${s===l.stage?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterLeads(v) { renderLeads(v.toLowerCase()); }
+
+function updateLeadStage(id, stage) {
+  const lead = leads.find(l => l.id===id);
+  if (!lead) return;
+  lead.stage = stage;
+  if (stage==='Closed won' && !lead.deal) {
+    const val = prompt('Enter deal value ($):');
+    if (val) { lead.deal = parseInt(val)||0; }
+  }
+  renderLeads();
+  renderPipeline();
+  showToast(`${lead.name} moved to "${stage}"`);
+}
+
+// ── RENDER PIPELINE ──
+function renderPipeline() {
+  const container = document.getElementById('pipelineFull');
+  container.innerHTML = STAGES.map(stage => {
+    const stageLeads = leads.filter(l => l.stage===stage);
+    const total = stageLeads.reduce((s,l) => s+l.deal, 0);
+    return `<div class="pipeline-col">
+      <div class="pipeline-header">
+        <span class="pipeline-stage-name">${stage}</span>
+        <span class="pipeline-count-badge">${stageLeads.length}</span>
+      </div>
+      ${stage==='Closed won' && total ? `<div class="pipeline-total">$${total.toLocaleString()}</div>` : ''}
+      <div class="pipeline-items">
+        ${stageLeads.length ? stageLeads.map(l => {
+          const post = posts.find(p => p.id===l.source);
+          const nextStage = STAGES[STAGES.indexOf(stage)+1];
+          return `<div class="lead-card-mini">
+            <div class="lead-name">${l.name}</div>
+            <div class="lead-meta">
+              ${l.source ? `<span class="tag tag-purple" style="font-size:9px">${l.source}</span>` : '<span style="font-size:11px;color:var(--muted)">no post</span>'}
+              ${l.deal ? `<span class="lead-revenue">$${l.deal.toLocaleString()}</span>` : ''}
+            </div>
+            ${nextStage ? `<button class="lead-stage-btn" style="margin-top:7px;font-size:10px" onclick="updateLeadStage('${l.id}','${nextStage}')">Move to ${nextStage} →</button>` : ''}
+          </div>`;
+        }).join('') : '<div style="padding:16px;font-size:12px;color:var(--muted);text-align:center">No leads here</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER LINKS ──
+function renderLinks() {
+  const tbody = document.getElementById('linksTableBody');
+  tbody.innerHTML = posts.map(p => {
+    const slug = p.slug || 'go'+p.id.slice(1);
+    return `<tr>
+      <td><span class="link-pill" onclick="copySmartLink('${p.id}')" style="max-width:160px">lnkd.roi/r/${slug}</span></td>
+      <td><span class="tag tag-purple">${p.id}</span></td>
+      <td style="font-size:12px;color:var(--muted2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.dest||'—'}</td>
+      <td style="font-family:var(--font-mono)">${p.clicks.toLocaleString()}</td>
+      <td>${p.leads}</td>
+      <td class="revenue-cell">${p.revenue ? '$'+p.revenue.toLocaleString() : '<span style="color:var(--muted)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RENDER CHART ──
+function renderChart() {
+  const container = document.getElementById('revenueChart');
+  const maxRev = Math.max(...posts.filter(p=>p.revenue).map(p=>p.revenue));
+  const colors = ['accent','teal','gold','coral','accent','teal'];
+  container.innerHTML = posts.filter(p=>p.revenue).map((p,i) => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar ${colors[i]||'accent'}" style="height:${Math.round(p.revenue/maxRev*140)}px" title="${p.title}&#10;\$\${p.revenue.toLocaleString()}"></div>
+      <div class="chart-label">${p.id}</div>
+    </div>
+  `).join('');
+}
+
+// ── ATTRIBUTION TOGGLE ──
+function setAttr(btn, model) {
+  const parent = btn.closest('.attr-toggle');
+  parent.querySelectorAll('.attr-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const revenueMap = { first:'$5,060', last:'$4,580', linear:'$4,820' };
+  if (revenueMap[model]) document.getElementById('m-revenue').textContent = revenueMap[model];
+}
+
+function selectAttrModel(card, model) {
+  document.querySelectorAll('.attr-model-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  showToast(`Attribution switched to ${model}-touch`);
+  renderChart();
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── INIT ──
+renderPosts();
+renderLeads();
+renderPipeline();
+renderLinks();
+renderChart();
+</script>
+</body>
+</html>
